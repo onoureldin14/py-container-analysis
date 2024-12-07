@@ -1,4 +1,4 @@
-# py-container-health
+# py-container-analysis
 
 Python repository for creating an Excel report on how to react to container vulnerabilities.
 
@@ -15,7 +15,7 @@ Python repository for creating an Excel report on how to react to container vuln
 
 ## Introduction
 
-`py-container-health` is a Python-based tool designed to generate comprehensive Excel reports on container vulnerabilities. It helps in identifying, analyzing, and providing recommendations for container security issues.
+`py-container-analysis` is a Python-based tool designed to generate comprehensive Excel reports on container vulnerabilities. It helps in identifying, analyzing, and providing recommendations for container security issues.
 
 ## Features
 
@@ -29,8 +29,8 @@ Python repository for creating an Excel report on how to react to container vuln
 
 1. Clone the repository:
     ```sh
-    git clone https://github.com/yourusername/py-container-health.git
-    cd py-container-health
+    git clone https://github.com/yourusername/py-container-analysis.git
+    cd py-container-analysis
     ```
 
 2. Create and activate a virtual environment:
@@ -53,7 +53,7 @@ Python repository for creating an Excel report on how to react to container vuln
     python main.py
     ```
 
-3. The generated reports will be saved in the [`healthcheck_output`](healthcheck_output ) directory.
+3. The generated reports will be saved in the [`analysischeck_output`](analysischeck_output ) directory.
 
 ## Configuration
 
@@ -80,7 +80,7 @@ api_token: "your_snyk_api_token"
 [.pre-commit-config.yaml](http://_vscodecontentref_/1)
 [config.yaml](http://_vscodecontentref_/2)
 [config.yaml.example](http://_vscodecontentref_/3)
-healthcheck_output/
+analysischeck_output/
 [main.py](http://_vscodecontentref_/4)
 path/
     to/
@@ -97,7 +97,7 @@ src/
         snyk_constants.py
         url_constants.py
         validation_rules.py
-    container_health_report.py
+    container_analysis_report.py
     scan_steps/
         step_a.py
         step_c.py
@@ -107,7 +107,7 @@ src/
         step_j_plus.py
         step_l.py
         step_n.py
-        health_check.py
+        analysis_check.py
     utils/
         calculate_similarity.py
         config_loader.py
