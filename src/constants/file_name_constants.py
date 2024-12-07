@@ -1,0 +1,7 @@
+JSON_OUTPUT_DIR = "healthcheck_output"
+PROJECT_LIST_JSON_FILE_PATH = f"{JSON_OUTPUT_DIR}/project_list.json"
+DEBIAN_VULNS_OUTPUT_FILE = f"{JSON_OUTPUT_DIR}/debian_security_data.json"
+ALPINE_VULNS_OUTPUT_FILE = f"{JSON_OUTPUT_DIR}/alpine_security_data"
+EKS_ECR_OUTPUT_FILE = f"{JSON_OUTPUT_DIR}/eks_ecr_data.json"
+HEALTH_REPORT_JSON_FILE_PATH = f"{JSON_OUTPUT_DIR}/container_health_report.json"
+HEALTH_REPORT_EXCEL_FILE_PATH = f"{JSON_OUTPUT_DIR}/container_health_report.xlsx"
