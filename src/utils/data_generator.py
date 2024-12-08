@@ -22,26 +22,52 @@ class DataGenerator:
         self.account_id = self.config["aws"]["account_id"]
         self.repo_url = f"{self.account_id }.dkr.ecr.{self.region}.amazonaws.com"
 
+    def enrich_issue(self, issue):
+        """
+        Helper function to dynamically fetch and populate issue fields.
+        """
+        project_name = issue["project_name"]
+
+        # Fetch and populate fields
+        issue["image_url"] = issue.get("image_url", self.get_img_from_ecr(project_name))
+        (
+            issue["base_img"],
+            issue["base_img_type"],
+            issue["nginx_version"],
+        ) = (
+            issue.get("base_img", None),
+            issue.get("base_img_type", None),
+            issue.get("nginx_version", None)
+            or self.get_image_base_ref_name(project_name),
+        )
+        issue["base_img_os"] = issue.get(
+            "base_img_os", self.img_os_checker(issue["image_url"])
+        )
+        issue["base_img_arch"] = issue.get(
+            "base_img_arch", self.get_image_architecture(issue["image_url"])
+        )
+
+        if issue["base_img_os"] == "linux":
+            (
+                issue["base_img_os_id"],
+                issue["base_img_os_version"],
+            ) = (
+                issue.get("base_img_os_id"),
+                issue.get("base_img_os_version"),
+            ) or self.linux_base_img_details(
+                project_name, issue["image_url"], issue["base_img"]
+            )
+        return issue
+
     def generate_project_data_json(self):
-        snyk_config_handler = SnykConfig(self.config)
-        SNYK_ORG_ID = snyk_config_handler.get_snyk_org_id()
-        SNYK_API_TOKEN = snyk_config_handler.get_snyk_api_token()
-        PROJECT_ISSUE_OUTPUT_FILE = file_name_constants.PROJECT_LIST_JSON_FILE_PATH
+        snyk_api_scan_enabled = str(self.config["snyk"]["snyk_api_enabled"]).lower()
+        enriched_project_issues = []
+        EKS_ECR_OUTPUT_FILE = file_name_constants.EKS_ECR_OUTPUT_FILE
         DEBIAN_URL = url_constants.DEBIAN_URL
         DEBIAN_VULNS_OUTPUT_FILE = file_name_constants.DEBIAN_VULNS_OUTPUT_FILE
-        EKS_ECR_OUTPUT_FILE = file_name_constants.EKS_ECR_OUTPUT_FILE
-        LIMIT_PROJECTS = snyk_constants.LIMIT_PROJECTS
-        SEVERITY_SELECTION = snyk_constants.SEVERITY_SELECTION
-        PROJECT_FILTER = snyk_constants.PROJECT_FILTER
+        PROJECT_ISSUE_OUTPUT_FILE = file_name_constants.PROJECT_LIST_JSON_FILE_PATH
+        self.ecr_login()
 
-        snyk_handler = SnykHandler(SNYK_API_TOKEN, SNYK_ORG_ID)
-
-        scanner_project_issues = snyk_handler.get_project_issues(
-            project_selection=LIMIT_PROJECTS,
-            severity_selection=SEVERITY_SELECTION,
-            project_name_filter=PROJECT_FILTER,
-        )
-        enriched_project_issues = []
         debian_data_set = self.download_debian_security_tracker(
             DEBIAN_URL, DEBIAN_VULNS_OUTPUT_FILE
         )
@@ -58,33 +84,50 @@ class DataGenerator:
             latest_image_versions_json = None
             logging.info("EKS check is disabled. Skipping Latest ECR image check.")
 
-        self.ecr_login()
+        if snyk_api_scan_enabled == "true":
+            logging.info(
+                "Snyk API scan is enabled. Fetching project issues from Snyk API."
+            )
+            snyk_config_handler = SnykConfig(self.config)
+            SNYK_ORG_ID = snyk_config_handler.get_snyk_org_id()
+            SNYK_API_TOKEN = snyk_config_handler.get_snyk_api_token()
+            LIMIT_PROJECTS = snyk_constants.LIMIT_PROJECTS
+            SEVERITY_SELECTION = snyk_constants.SEVERITY_SELECTION
+            PROJECT_FILTER = snyk_constants.PROJECT_FILTER
 
-        for issue in scanner_project_issues:
-            project_name = issue["project_name"]
-            self.docker_pull(project_name)
+            snyk_handler = SnykHandler(SNYK_API_TOKEN, SNYK_ORG_ID)
 
-            issue["image_url"] = self.get_img_from_ecr(project_name)
-            (
-                issue["base_img"],
-                issue["base_img_type"],
-                issue["nginx_version"],
-            ) = self.get_image_base_ref_name(project_name)
-            issue["base_img_os"] = self.img_os_checker(issue["image_url"])
-            issue["base_img_arch"] = self.get_image_architecture(issue["image_url"])
-            if issue["base_img_os"] == "linux":
-                (
-                    issue["base_img_os_id"],
-                    issue["base_img_os_version"],
-                ) = self.linux_base_img_details(
-                    project_name, issue["image_url"], issue["base_img"]
+            scanner_project_issues = snyk_handler.get_project_issues(
+                project_selection=LIMIT_PROJECTS,
+                severity_selection=SEVERITY_SELECTION,
+                project_name_filter=PROJECT_FILTER,
+            )
+
+            self.ecr_login()
+
+            for issue in scanner_project_issues:
+                enriched_project_issues.append(self.enrich_issue(issue))
+
+            with open(PROJECT_ISSUE_OUTPUT_FILE, "w") as json_file:
+                json.dump(enriched_project_issues, json_file, indent=4)
+
+            logging.info(f"Generated project JSON saved to {PROJECT_ISSUE_OUTPUT_FILE}")
+
+        else:
+            logging.info(
+                "Snyk API scan is disabled. Fetching project issues from local file."
+            )
+            try:
+                with open(PROJECT_ISSUE_OUTPUT_FILE, "r") as json_file:
+                    loaded_data = json.load(json_file)
+                    for issue in loaded_data:
+                        enriched_project_issues.append(self.enrich_issue(issue))
+            except FileNotFoundError:
+                logging.error(
+                    f"File {PROJECT_ISSUE_OUTPUT_FILE} does not exist. No project issues to load."
                 )
-            enriched_project_issues.append(issue)
+                raise FileNotFoundError
 
-        with open(PROJECT_ISSUE_OUTPUT_FILE, "w") as json_file:
-            json.dump(enriched_project_issues, json_file, indent=4)
-
-        logging.info(f"Generated project JSON saved to {PROJECT_ISSUE_OUTPUT_FILE}")
         return enriched_project_issues, latest_image_versions_json, debian_data_set
 
     def get_img_from_ecr(self, project_name):

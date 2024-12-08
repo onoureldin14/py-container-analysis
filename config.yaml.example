@@ -10,5 +10,6 @@ deployment:
 
 
 snyk:
+  snyk_api_enabled: true
   org_id: my_snyk_org_id
   api_token: my_snyk_api_token

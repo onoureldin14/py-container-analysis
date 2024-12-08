@@ -35,13 +35,13 @@ Python repository for creating an Excel report on how to react to container vuln
 
 2. Create and activate a virtual environment:
     ```sh
-    python -m venv venv
-    source venv/bin/activate  # On Windows use `venv\Scripts\activate`
+    python3 -m venv venv
+    source path/to/venv/bin/activate  # On Windows use `venv\Scripts\activate`
     ```
 
 3. Install the required dependencies:
     ```sh
-    pip install -r requirements.txt
+    python3 -m pip install -r requirements.txt
     ```
 
 ## Usage
@@ -60,6 +60,9 @@ Python repository for creating an Excel report on how to react to container vuln
 The configuration file [`config.yaml`](config.yaml ) contains settings for deployment and Snyk integration. Here is an example configuration:
 
 ```yaml
+aws:
+    account_id: "your_aws_account_id"
+
 deployment:
   check_latest_ecr_in_eks: false
   multi_cluster_scan: false
@@ -68,8 +71,9 @@ deployment:
 
 snyk:
 ```yaml
-org_id: "your_snyk_org_id"
-api_token: "your_snyk_api_token"
+    snyk_api_enabled: true
+    org_id: "your_snyk_org_id"
+    api_token: "your_snyk_api_token"
 ```
 '''
 

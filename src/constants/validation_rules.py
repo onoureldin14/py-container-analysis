@@ -28,6 +28,11 @@ validation_rules = {
         "format": "str",
         "choices": dev_environments,
     },
-    "snyk.org_id": {"required": True, "type": "str"},
-    "snyk.api_token": {"required": True, "type": "str", "format": "snyk_api_token"},
+    "snyk.snyk_api_enabled": {
+        "required": True,
+        "type": "bool",
+        "choices": ["true", "false"],
+    },
+    "snyk.org_id": {"required": False, "type": "str"},
+    "snyk.api_token": {"required": False, "type": "str", "format": "snyk_api_token"},
 }

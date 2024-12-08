@@ -47,7 +47,12 @@ class ConfigLoader:
         masked_value = ConfigLoader.mask_sensitive_value(key, value)
         logging.info(f"Validating {key}: {masked_value} with rules: {rules}")
 
-        if "required" in rules and rules["required"] and (value is None or value == ""):
+        if not rules.get("required", False) and (value is None or value == ""):
+            logging.info(f"{key} is optional and not provided. Skipping validation.")
+            return
+
+        # Check required fields
+        if rules.get("required", False) and (value is None or value == ""):
             raise ValueError(f"{key} is required but was not provided.")
 
         if "type" in rules:
@@ -102,7 +107,20 @@ class ConfigLoader:
                 if value is None:
                     break
             ConfigLoader.validate_value(key_path, value, rules)
-            ConfigLoader.ensure_output_directory_exists()
+        snyk_api_enabled = str(
+            config.get("snyk", {}).get("snyk_api_enabled", "false")
+        ).lower()
+        if snyk_api_enabled == "true":
+            if not config["snyk"].get("org_id"):
+                raise ValueError(
+                    "snyk.org_id is required when snyk_api_enabled is true."
+                )
+            if not config["snyk"].get("api_token"):
+                raise ValueError(
+                    "snyk.api_token is required when snyk_api_enabled is true."
+                )
+
+        ConfigLoader.ensure_output_directory_exists()
 
     @staticmethod
     def load_config(file_path):
