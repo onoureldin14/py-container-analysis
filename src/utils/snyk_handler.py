@@ -109,10 +109,9 @@ class SnykHandler:
                     if name == project_name_filter
                 }
                 if not projects:
-                    logging.error(
+                    raise ValueError(
                         f"No projects found matching the name: {project_name_filter}"
                     )
-                    raise
 
             # Additional filtering for project selection
             if project_selection is not None and isinstance(project_selection, int):
