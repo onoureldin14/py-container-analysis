@@ -70,13 +70,10 @@ deployment:
   test_namespace_2: namespace-2
 
 snyk:
-```yaml
     snyk_api_enabled: true
     org_id: "your_snyk_org_id"
     api_token: "your_snyk_api_token"
 ```
-'''
-
 ## Project Structure
 '''
 .DS_Store
