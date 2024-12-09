@@ -40,6 +40,7 @@ class DataGenerator:
             issue.get("nginx_version", None)
             or self.get_image_base_ref_name(project_name),
         )
+
         issue["base_img_os"] = issue.get(
             "base_img_os", self.img_os_checker(issue["image_url"])
         )
@@ -85,12 +86,10 @@ class DataGenerator:
             logging.info("EKS check is disabled. Skipping Latest ECR image check.")
 
         if snyk_api_scan_enabled == "true":
-            logging.info(
-                "Snyk API scan is enabled. Fetching project issues from Snyk API."
-            )
             snyk_config_handler = SnykConfig(self.config)
             SNYK_ORG_ID = snyk_config_handler.get_snyk_org_id()
             SNYK_API_TOKEN = snyk_config_handler.get_snyk_api_token()
+            PROJECT_ISSUE_OUTPUT_FILE = file_name_constants.PROJECT_LIST_JSON_FILE_PATH
             LIMIT_PROJECTS = snyk_constants.LIMIT_PROJECTS
             SEVERITY_SELECTION = snyk_constants.SEVERITY_SELECTION
             PROJECT_FILTER = snyk_constants.PROJECT_FILTER
@@ -106,12 +105,56 @@ class DataGenerator:
             self.ecr_login()
 
             for issue in scanner_project_issues:
-                enriched_project_issues.append(self.enrich_issue(issue))
+                project_name = issue["project_name"]
+                self.docker_pull(project_name)
+
+                issue["image_url"] = self.get_img_from_ecr(project_name)
+                (
+                    issue["base_img"],
+                    issue["base_img_type"],
+                    issue["nginx_version"],
+                ) = self.get_image_base_ref_name(project_name)
+                issue["base_img_os"] = self.img_os_checker(issue["image_url"])
+                issue["base_img_arch"] = self.get_image_architecture(issue["image_url"])
+                if issue["base_img_os"] == "linux":
+                    (
+                        issue["base_img_os_id"],
+                        issue["base_img_os_version"],
+                    ) = self.linux_base_img_details(
+                        project_name, issue["image_url"], issue["base_img"]
+                    )
+                enriched_project_issues.append(issue)
 
             with open(PROJECT_ISSUE_OUTPUT_FILE, "w") as json_file:
                 json.dump(enriched_project_issues, json_file, indent=4)
 
             logging.info(f"Generated project JSON saved to {PROJECT_ISSUE_OUTPUT_FILE}")
+        # if snyk_api_scan_enabled == "true":
+        #     logging.info("Snyk API scan is enabled. Fetching project issues from Snyk API.")
+        #     snyk_config_handler = SnykConfig(self.config)
+        #     SNYK_ORG_ID = snyk_config_handler.get_snyk_org_id()
+        #     SNYK_API_TOKEN = snyk_config_handler.get_snyk_api_token()
+        #     LIMIT_PROJECTS = snyk_constants.LIMIT_PROJECTS
+        #     SEVERITY_SELECTION = snyk_constants.SEVERITY_SELECTION
+        #     PROJECT_FILTER = snyk_constants.PROJECT_FILTER
+
+        #     snyk_handler = SnykHandler(SNYK_API_TOKEN, SNYK_ORG_ID)
+
+        #     scanner_project_issues = snyk_handler.get_project_issues(
+        #         project_selection=LIMIT_PROJECTS,
+        #         severity_selection=SEVERITY_SELECTION,
+        #         project_name_filter=PROJECT_FILTER,
+        #     )
+
+        #     self.ecr_login()
+
+        #     for issue in scanner_project_issues:
+        #         enriched_project_issues.append(self.enrich_issue(issue))
+
+        #     with open(PROJECT_ISSUE_OUTPUT_FILE, "w") as json_file:
+        #         json.dump(enriched_project_issues, json_file, indent=4)
+
+        #     logging.info(f"Generated project JSON saved to {PROJECT_ISSUE_OUTPUT_FILE}")
 
         else:
             logging.info(

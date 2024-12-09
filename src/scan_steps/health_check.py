@@ -1,3 +1,4 @@
+from src.scan_steps.step_a_eks import check_latest_image_version_eks
 from src.scan_steps.step_a import check_latest_image_version
 from src.scan_steps.step_c import check_dotnet_support
 from src.scan_steps.step_e import check_latest
@@ -29,19 +30,26 @@ class HealthCheck:
         issue_id = self.vulnerability.get("issue_id", "")
 
         if self.latest_image_versions is None:
-            img_version_check_message = self.step_messages["IMG_VERSION_CHECK_MISSING"]
+            img_version_check_message = self.step_messages[
+                "IMG_VERSION_CHECK_EKS_MISSING"
+            ]
         else:
-            img_version_check_message = self.step_messages["IMG_VERSION_CHECK"]
+            img_version_check_message = self.step_messages["IMG_VERSION_CHECK_EKS"]
 
         check_functions = [
             (
-                "IMG_VERSION_CHECK",
-                check_latest_image_version,
+                "IMG_VERSION_CHECK_EKS",
+                check_latest_image_version_eks,
                 [
                     self.vulnerability,
                     self.latest_image_versions,
                     img_version_check_message,
                 ],
+            ),
+            (
+                "IMG_VERSION_CHECK",
+                check_latest_image_version,
+                [self.vulnerability, self.step_messages["IMG_VERSION_CHECK"]],
             ),
             (
                 "DOTNET_SUPPORTED_BASE_CHECK",

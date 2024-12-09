@@ -1,16 +1,25 @@
 STEP_MESSAGES = {
+    "IMG_VERSION_CHECK_EKS": {
+        "FAIL": {
+            "message": "Scanner not targeting image version used in EKS Cluster",
+            "recommendation": "Ensure that the image version scanned is the same deployed in the EKS cluster.",
+        },
+        "PASS": {
+            "message": "The project is using the latest image version in the EKS Cluster."
+        },
+    },
+    "IMG_VERSION_CHECK_EKS_MISSING": {
+        "FAIL": {
+            "message": "EKS Latest image version check has been skipped",
+            "recommendation": "Ensure you enable the check_latest_ecr_in_eks and configure your EKS cluster.",
+        }
+    },
     "IMG_VERSION_CHECK": {
         "FAIL": {
             "message": "Scanner not targeting latest image version",
             "recommendation": "Ensure that the latest image version is used. Check why the image version in the scanning tool does not match the image used in the environment.",
         },
         "PASS": {"message": "The project is using the latest image version."},
-    },
-    "IMG_VERSION_CHECK_MISSING": {
-        "FAIL": {
-            "message": "Latest image version check has been skipped",
-            "recommendation": "Ensure you enable the check_latest_ecr_in_eks and configure your EKS cluster.",
-        }
     },
     "DOTNET_SUPPORTED_BASE_CHECK": {
         "FAIL": {
