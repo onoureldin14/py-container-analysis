@@ -36,7 +36,9 @@ class ContainerHealthReport:
                 alpine_link = f"{url_constants.ALPINE_URL}/v{alpine_version}/main.json"
                 link = alpine_link
             elif base_img_os_id == "debian":
-                debian_link = f"{url_constants.DEBIAN_URL}/{package_cve}"
+                debian_link = (
+                    f"https://security-tracker.debian.org/tracker/{package_cve}"
+                )
                 link = debian_link
 
             package_details = (
