@@ -1,7 +1,7 @@
 import logging
 import json
 from src.utils.data_generator import DataGenerator
-from src.container_health_report import ContainerHealthReport
+from src.utils.container_health_report import ContainerHealthReport
 from src.utils.generate_excel_report import generate_excel_report
 from src.constants import file_name_constants
 

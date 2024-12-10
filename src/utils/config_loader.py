@@ -20,7 +20,7 @@ class ConfigLoader:
     @staticmethod
     def mask_sensitive_value(key, value):
         """Mask sensitive values."""
-        sensitive_keys = ["snyk_api_token", "org_id", "webhook"]
+        sensitive_keys = ["api_token", "org_id", "account_id"]
         if any(sensitive_key in key for sensitive_key in sensitive_keys):
             return "*" * len(str(value))
         return value

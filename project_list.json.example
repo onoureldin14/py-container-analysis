@@ -1,0 +1,29 @@
+[
+    {
+        "project_name": "docker-dotnet-sample-app:latest",
+        "project_ID": "PROJECT_ID",
+        "project_url": "PROJECT_URL",
+        "issue_title": "Integer Overflow or Wraparound",
+        "issue_id": "SNYK-DEBIAN11-ZLIB-6008961",
+        "issue_url": "https://snyk.io/vuln/SNYK-DEBIAN11-ZLIB-6008961",
+        "issue_severity": "critical",
+        "issue_cwe": [
+            "CWE-190"
+        ],
+        "issue_cve": [
+            "CVE-2023-45853"
+        ],
+        "package_name": "zlib/zlib1g",
+        "package_version": [
+            "1:1.2.11.dfsg-2+deb11u2"
+        ],
+        "image_url": "AWS_ACCOUNT_ID.dkr.ecr.AWS_REGION.amazonaws.com/docker-dotnet-sample-app@sha256:IMAGE_DIGEST",
+        "base_img": "mcr.microsoft.com/dotnet/aspnet:6.0",
+        "base_img_type": "dotnet",
+        "nginx_version": null,
+        "base_img_os": "linux",
+        "base_img_arch": "amd64",
+        "base_img_os_id": "debian",
+        "base_img_os_version": "bullseye"
+    }
+]

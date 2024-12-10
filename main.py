@@ -1,6 +1,6 @@
 import logging
 from src.utils.logging_handler import LoggingHandler
-from src.utils.project_state_manager import ProjectStateManager
+from src.project_state_manager import ProjectStateManager
 
 
 if __name__ == "__main__":
