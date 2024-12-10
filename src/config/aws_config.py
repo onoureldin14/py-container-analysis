@@ -25,7 +25,7 @@ class AWSConfig:
 
     def get_eks_cluster_name(self):
         """Generate EKS cluster name."""
-        return f"{self.aws_config['eks_cluster_environment']}-eks-{self.aws_config['eks_cluster_color']}"
+        return f"{self.aws_config['eks_cluster_name']}"
 
     def get_kube_context(self):
         """Generate Kubernetes context ARN."""
